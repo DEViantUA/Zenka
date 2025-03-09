@@ -1,0 +1,9 @@
+aiofiles
+aiohttp
+cachetools
+more-itertools
+numpy
+Pillow
+pydantic
+beautifulsoup4
+anyio
