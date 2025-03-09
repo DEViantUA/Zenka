@@ -6,7 +6,7 @@ from typing import List, Optional,Tuple
 from .http import AioSession
 from .error import ZZZError
 from ..model.base import Lang, HoyoAPIHeaders, ErrorText
-from ..model.api import CharacterDataHoYo, Zenka
+from ..model.api import CharacterDataHoYo, ZenkaApi
 
 API_URL = "https://enka.network/api/zzz/uid/{uid}"
 RAW_BASE_URL = "https://raw.githubusercontent.com/EnkaNetwork/API-docs/master/store/zzz/"
@@ -145,10 +145,10 @@ class DataManager:
         return all(os.path.exists(os.path.join(JSON_DIR, f.replace(".json", "_data.json"))) for f in JSON_FILES)
 
 
-async def fetch_user(uid: int) -> Zenka:
+async def fetch_user(uid: int) -> ZenkaApi:
     data = await AioSession.get(API_URL.format(uid = uid), response_format= "json")
     if data.get("message"):
         raise ZZZError(ErrorText().format_api(text = data.get("message")))
 
-    return Zenka(jsons_data=jsons_data, lang=lang, **data["PlayerInfo"])
+    return ZenkaApi(jsons_data=jsons_data, lang=lang, **data["PlayerInfo"])
 

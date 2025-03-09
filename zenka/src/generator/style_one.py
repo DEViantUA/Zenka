@@ -63,11 +63,12 @@ async def get_cinema(index: int) -> Image.Image:
 
 
 class StyleOne:
-    def __init__(self, data: Character, player: PlayerData, lang: Translator, art: str = None, color: tuple = None):
+    def __init__(self, data: Character, player: PlayerData, lang: Translator, art: str = None, color: tuple = None, hide: bool = False):
         self.data = data
         self.player = player
         self.lang = lang
         self.art = art
+        self.hide = hide
         
         if color:
             self.color = color
@@ -422,6 +423,8 @@ class StyleOne:
         name_c = await pill.recolor_image(name, self.color[:3])
 
         uid = f"UID: {self.player.profile.uid}"
+        if self.hide:
+            uid = f"UID: Hide"
         uid = await pill.create_image_with_text(uid, 25,stroke_width=1, stroke_fill= (0,0,0,255), max_width= 250)
         uid_c = await pill.recolor_image(uid, self.color[:3])
 

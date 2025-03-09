@@ -11,10 +11,11 @@ from ..model.assets import get_agent_icon, hex_to_rgba
 _of = ImageCache()
 
 class StyleOneProfile:
-    def __init__(self, data: Character, player: PlayerData, lang: Translator, color: tuple = None):
+    def __init__(self, data: Character, player: PlayerData, lang: Translator, color: tuple = None, hide: bool = False):
         self.data = data
         self.player = player
         self.lang = lang        
+        self.hide = hide
         if color:
             self.color = color
         else:
@@ -81,6 +82,8 @@ class StyleOneProfile:
 
         d = ImageDraw.Draw(uid_c)
         text_uid = f"Agent: {self.player.profile.uid}"
+        if self.hide:
+            text_uid = f"Agent: Hide"
         x = int(font.getlength(text_uid) / 2)
         d.text((118 - x, 10), text_uid, font=font, fill=self.color)
 

@@ -19,7 +19,7 @@ def save_file(id: int, card: Image.Image):
 class Client:
     def __init__(
         self, lang: Union[Lang,str] = Lang.EN.value,
-        character_art: Optional[Dict[int, str]] = None,
+        character_art: Optional[Dict[Union[int,str], str]] = None,
         character_id: Optional[List[int]] = None,
         config: Config = None
     ):
@@ -50,7 +50,7 @@ class Client:
     async def __aexit__(self, exc_type, exc, tb):
         await http.AioSession.exit(exc_type, exc, tb)
 
-    async def get_api(self, uid: Union[str,int]) -> api.Zenka:
+    async def get_api(self, uid: Union[str,int]) -> api.ZenkaApi:
         return  await api.fetch_user(uid)
     
     async def update_asset(self) -> None:
@@ -63,8 +63,9 @@ class Client:
             result.charter_name.append(key.name)
             result.charter_id.append(key.id)
 
-        result.cards.append(await style_one_profile.StyleOneProfile(key, data.player, self.translateLang, color = self.config.color.get(key.id)).start())
-
+        result.cards.append(await style_one_profile.StyleOneProfile(key, data.player, self.translateLang, color = self.config.color.get(key.id), hide = self.config.hide_uid).start())
+        result.player = data.player
+        
         if self.config.save:
             for key in result.cards:
                 save_file(uid, key.card)
@@ -83,8 +84,9 @@ class Client:
                 if not key.id in self.character_id:
                     continue 
         
-            task.append(style_one.StyleOne(key, data.player, self.translateLang, art = self.character_art.get(key.id), color = self.config.color.get(key.id)).start())
-
+            task.append(style_one.StyleOne(key, data.player, self.translateLang, art = self.character_art.get(key.id), color = self.config.color.get(key.id), hide = self.config.hide_uid).start())
+        
+        result.player = data.player
         result.cards = await asyncio.gather(*task)
 
 

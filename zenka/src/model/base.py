@@ -91,10 +91,11 @@ class CacheConfig(BaseModel):
 class Config(BaseModel):
     font: Optional[str] = None
     save: bool = False
+    hide_uid: bool = False
     asset_save: bool = False
     cache: CacheConfig = CacheConfig()
     proxy: Optional[str] = None
-    color: Dict[int, Tuple[int, int, int]] = Field(default_factory=dict)
+    color: Dict[int, Tuple[int, int, int, int]] = Field(default_factory=dict)
 
 class ErrorText(BaseModel):
     lang: Dict[int, str] = {"code": 1, "text": "This language key [{lang}] is not supported"}

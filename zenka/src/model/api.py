@@ -395,7 +395,7 @@ class WeaponProps(BaseModel):
     icon: str = None
 
 
-class Zenka(BaseModel):
+class ZenkaApi(BaseModel):
     player: Optional[PlayerData] = Field(alias="SocialDetail")
     character_info: CharacterData = Field(alias="ShowcaseDetail")
 

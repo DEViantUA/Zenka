@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field
-from typing import List, Tuple, Optional
-from ..model.api import PlayerData
+from pydantic import BaseModel
+from typing import List
 from PIL import Image
 
 

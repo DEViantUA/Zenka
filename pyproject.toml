@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "zenka"
+version = "0.1.0"
+description = "Python module for processing EnkaNetwork API and creating profile cards, character"
+authors = ["DEViantUA <deviantapi@gmail.com>", "YASHIRO ISANA <customfailure00001@gmail.com>"]
+license = "MIT License with Additional Restrictions"
+
+readme = 'README.md'  # Markdown files are supported
+
+repository = "https://github.com/DEViantUA/Zenka"
+homepage = "https://github.com/DEViantUA/Zenka"
+
+keywords = ["enka", "enkanetwork", "zenka", "zerozonezenless","zenless", "zero", "zone", "zzz", "api", "card"] 
+
+[tool.poetry.dependencies]
+Pillow = "*"
+python = "^3.9"
+aiofiles = "*"
+aiohttp = "*"
+cachetools = "*"
+more-itertools = "*"
+numpy = "*"
+pydantic = "*"
+beautifulsoup4 = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
