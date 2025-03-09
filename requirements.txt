@@ -6,4 +6,3 @@ numpy
 Pillow
 pydantic
 beautifulsoup4
-anyio
