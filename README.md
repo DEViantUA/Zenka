@@ -63,3 +63,15 @@ uid = 1500004451
 
 asyncio.run(main(uid))
 ```
+
+
+## Languages Supported
+| Languege    |  Code   | Enume        | Languege    |  Code   | Enume        | Languege    |  Code   | Enume        |
+|-------------|---------|-------------|-------------|---------|-------------|-------------|---------|-------------|
+|  English    |     en  | Lang.EN      |  русский    |     ru  | Lang.RU      |  Chinese    |    chs  | Lang.CN      |
+|  Tiếng Việt |     vi  | Lang.VI      |  ไทย        |     th  | Lang.TH      |  Taiwan     |    cht  | Lang.CHT     |
+|  português  |     pt  | Lang.PT      | 한국어      |     kr  | Lang.KR      |  deutsch    |     de  | Lang.DE      |
+|  日本語      |     jp  | Lang.JP      | 中文        |     zh  | Lang.CN      |  español    |     es  | Lang.ES      |
+|  中文        |     zh  | Lang.CN      | Indonesian |     id  | Lang.ID      |  français   |     fr  | Lang.FR      |
+
+
