@@ -6,7 +6,6 @@ ____
 
 ## Zenka
 Python module for processing EnkaNetwork API and creating profile cards, character <br><br>
-:white_medium_square: [Documentation](https://github.com/DEViantUA/EnkaCard/wiki)<br>
 :white_medium_square: [Telegram](https://t.me/enkacardchat)<br>
 :white_medium_square: [Generation results](https://github.com/DEViantUA/EnkaCard/wiki/Resultate)<br>
 
@@ -75,3 +74,33 @@ asyncio.run(main(uid))
 |  中文        |     zh  | Lang.CN      | Indonesian |     id  | Lang.ID      |  français   |     fr  | Lang.FR      |
 
 
+## Resultat:
+<details>
+<summary>Card</summary>
+ 
+[![Card][1]][1]
+ 
+[1]: https://raw.githubusercontent.com/DEViantUA/Zenka/refs/heads/main/readme/card.png
+
+[![Card Art][2]][2]
+ 
+[2]: https://raw.githubusercontent.com/DEViantUA/Zenka/refs/heads/main/readme/card_art.png
+
+</details>
+
+<details>
+<summary>Profile</summary>
+ 
+[![Profile][3]][3]
+ 
+[3]: https://raw.githubusercontent.com/DEViantUA/Zenka/refs/heads/main/readme/profile.png
+
+</details>
+
+
+
+## Thank you for your support! ❤️
+
+<a href="https://github.com/CUSTOMFAIL" target="_blank">
+    <img src="https://github.com/CUSTOMFAIL.png" width="50" style="border-radius: 50%;">
+</a>
