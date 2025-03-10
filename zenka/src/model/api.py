@@ -472,9 +472,9 @@ class ZenkaApi(BaseModel):
             medal.icon = medal_data.get(str(medal.id)).get("Icon")
         
         title = titles_data.get(str(self.player.profile.title.id))
+        self.player.profile.icon = pfps_data.get(str(self.player.profile.pfp_id)).get("Icon")
         if title:
             self.player.profile.title.name =  data_lang.get(title.get("TitleText"))
             self.player.profile.title.color = Color(accent= title.get("ColorA"), mindscape= title.get("ColorB"))
-            self.player.profile.icon = pfps_data.get(str(self.player.profile.pfp_id)).get("Icon")
         else:
             self.player.profile.title = None
