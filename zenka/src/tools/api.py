@@ -64,7 +64,7 @@ async def fetch_hoyowiki_data() -> None:
     tasks = [fetch_page(i["ep_abstract"]["entry_page_id"], i["ep_abstract"]["name"]) 
                 for i in json_res["data"]["contents"]]
     results = await asyncio.gather(*tasks)
-
+    results = [x for x in results if x is not None]
     enka_names = {jsons_data["locs_data"][lang][c_data["Name"]]: cid 
                     for cid, c_data in jsons_data["avatars_data"].items()}
 
@@ -77,14 +77,15 @@ async def fetch_hoyowiki_data() -> None:
         for e_name, h_name in matches.items() if h_name
     }
 
-async def fetch_page(pid: str, name: str) -> Tuple[str, str, str, str, str, str]:
+async def fetch_page(pid: str, name: str):
     json_res = await AioSession.get(HOYO_WIKI.format(pid = pid), headers=HoyoAPIHeaders.HEADERS, response_format= "json")
     data = json_res["data"]["page"]["filter_values"]
 
     faction = data.get("agent_faction", {}).get("value_types", [{}])
     if faction:
         faction = faction[0].get("icon", "default_faction_icon")
-
+    if not faction and not json_res["data"]["page"]["header_img_url"]:
+        return None
     element = data.get("agent_stats", {}).get("value_types", [{}])[0].get("icon", "unknown")
     tipe = data.get("agent_specialties", {}).get("value_types", [{}])[0].get("icon", "")
     return name, json_res["data"]["page"]["header_img_url"], pid, faction, tipe, element.strip()
