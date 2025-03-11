@@ -62,7 +62,7 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
     promotion = int(promotion)
     avatar_data = jsons_data["avatars_data"].get(str(cid), {})
     if not avatar_data:
-        raise ValueError(f"Не найдены данные персонажа для CID {cid}")
+        raise ValueError(f"No character data found for CID {cid}")
 
     base_props = avatar_data.get("BaseProps", {}).copy()
     growth_props = avatar_data.get("GrowthProps", {})
@@ -70,7 +70,7 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
     core_enhancement_props = avatar_data.get("CoreEnhancementProps", {})
 
     if promotion - 1 >= len(promotion_props):
-        raise ValueError(f"Некорректный promotion {promotion} для CID {cid}")
+        raise ValueError(f"Incorrect promotion {promotion} for CID {cid}")
 
     promotion_values = promotion_props[promotion - 1]
     core_enhancement_values = core_enhancement_props[core]
@@ -229,11 +229,9 @@ class ProfileDetail(BaseModel):
     level: int = Field(alias="Level")
     title: Union[Title, int] = Field(alias="Title")
     pfp_id: int = Field(alias="ProfileId")
-    #banne: dict = None
 
     @field_validator("title")
     def validate_title(cls, value):
-        """ Если title — это int, превращаем его в объект Title с id """
         if isinstance(value, int):
             return Title(id=value)
         return value

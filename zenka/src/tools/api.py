@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import difflib
-from typing import List, Optional,Tuple
+from typing import List, Optional,Tuple,Union
 from .http import AioSession
 from .error import ZZZError
 from ..model.base import Lang, HoyoAPIHeaders, ErrorText
@@ -64,34 +64,61 @@ async def fetch_hoyowiki_data() -> None:
     tasks = [fetch_page(i["ep_abstract"]["entry_page_id"], i["ep_abstract"]["name"]) 
                 for i in json_res["data"]["contents"]]
     results = await asyncio.gather(*tasks)
+    
+    results = [x for x in results if x is not None]
 
     enka_names = {jsons_data["locs_data"][lang][c_data["Name"]]: cid 
                     for cid, c_data in jsons_data["avatars_data"].items()}
-
+    
     hoyo_data = {name: CharacterDataHoYo(name=name, link=link, id=hcid, faction=faction, type=tipe, element=element)
                     for name, link, hcid, faction, tipe, element in results}
 
-    matches = {b_name: find_best_match(b_name, hoyo_data.keys()) for b_name in enka_names.keys()}
+    matches = {}
+    unmatched = []
+
+    for b_name in enka_names.keys():
+        exact_match = next((h_name for h_name in hoyo_data.keys() if b_name.lower() in h_name.lower()), None)
+        
+        if exact_match:
+            matches[b_name] = exact_match
+        else:
+            unmatched.append(b_name)
+
+    remaining_hoyo_keys = set(hoyo_data.keys()) - set(matches.values())
+    for b_name in unmatched:
+        best_match = find_best_match(b_name, list(remaining_hoyo_keys))
+        if best_match:
+            matches[b_name] = best_match
+            remaining_hoyo_keys.remove(best_match) 
     jsons_data["hoyolink_data"] = {
         enka_names[e_name]: hoyo_data[h_name].model_dump()
         for e_name, h_name in matches.items() if h_name
     }
 
-async def fetch_page(pid: str, name: str) -> Tuple[str, str, str, str, str, str]:
+async def fetch_page(pid: str, name: str) -> Union[Tuple[str, str, str, str, str, str], bool]:
     json_res = await AioSession.get(HOYO_WIKI.format(pid = pid), headers=HoyoAPIHeaders.HEADERS, response_format= "json")
     data = json_res["data"]["page"]["filter_values"]
+
+    # if not data["agent_faction"]["values"]:
+    #     return None
 
     faction = data.get("agent_faction", {}).get("value_types", [{}])
     if faction:
         faction = faction[0].get("icon", "default_faction_icon")
 
-    element = data.get("agent_stats", {}).get("value_types", [{}])[0].get("icon", "unknown")
-    tipe = data.get("agent_specialties", {}).get("value_types", [{}])[0].get("icon", "")
+    if data.get("agent_stats", {})["value_types"]:
+        element = data.get("agent_stats", {}).get("value_types", [{}])[0].get("icon", "unknown")
+    if data.get("agent_specialties", {})["value_types"]:
+        tipe = data.get("agent_specialties", {}).get("value_types", [{}])[0].get("icon", "")
+    else:
+        return None
+
+
     return name, json_res["data"]["page"]["header_img_url"], pid, faction, tipe, element.strip()
 
 def find_best_match(name: str, candidates: List[str]) -> Optional[str]:
     return next((c for c in candidates if name.lower() in c.lower()),
-                (difflib.get_close_matches(name, candidates, n=1, cutoff=0.3) or [None])[0])
+                (difflib.get_close_matches(name, candidates, n=1, cutoff=0.2) or [None])[0])
 
 class DataManager:
     def __init__(self):

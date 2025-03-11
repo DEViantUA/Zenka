@@ -204,7 +204,7 @@ class StyleOne:
         
         name_main = await pill.create_image_with_text(self.data.weapon.name, 33, stroke_width=2, stroke_fill= (0,0,0,255), max_width= 309)
         name = await pill.create_image_with_text(self.data.weapon.name, 33, max_width= 309)
-        name = await pill.recolor_image(name, self.color[:3])
+        name = await pill.recolor_image(name, self.color[:3]) 
         xyz = 0
         if name_main.size[1] > 60:
             xyz = 20
