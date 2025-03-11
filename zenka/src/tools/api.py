@@ -99,9 +99,6 @@ async def fetch_page(pid: str, name: str) -> Union[Tuple[str, str, str, str, str
     json_res = await AioSession.get(HOYO_WIKI.format(pid = pid), headers=HoyoAPIHeaders.HEADERS, response_format= "json")
     data = json_res["data"]["page"]["filter_values"]
 
-    # if not data["agent_faction"]["values"]:
-    #     return None
-
     faction = data.get("agent_faction", {}).get("value_types", [{}])
     if faction:
         faction = faction[0].get("icon", "default_faction_icon")
@@ -172,10 +169,13 @@ class DataManager:
         return all(os.path.exists(os.path.join(JSON_DIR, f.replace(".json", "_data.json"))) for f in JSON_FILES)
 
 
-async def fetch_user(uid: int) -> ZenkaApi:
+async def fetch_user(uid: int, original: bool = False) -> ZenkaApi:
     data = await AioSession.get(API_URL.format(uid = uid), response_format= "json")
     if data.get("message"):
         raise ZZZError(ErrorText().format_api(text = data.get("message")))
-
+    
+    if original:
+        return data
+    
     return ZenkaApi(jsons_data=jsons_data, lang=lang, **data["PlayerInfo"])
 

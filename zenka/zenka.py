@@ -2,7 +2,7 @@ import datetime
 import asyncio
 import os
 from PIL import Image
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Tuple
 from .src.model.base import Config, Lang, ErrorText, TranslationLang
 from .src.model.generator import ZenkaGenerator
 from .src.tools import cache, error, http, git, options, api
@@ -50,20 +50,20 @@ class Client:
     async def __aexit__(self, exc_type, exc, tb):
         await http.AioSession.exit(exc_type, exc, tb)
 
-    async def get_api(self, uid: Union[str,int]) -> api.ZenkaApi:
-        return  await api.fetch_user(uid)
+    async def get_api(self, uid: Union[str,int], original: bool = False) -> api.ZenkaApi:
+        return  await api.fetch_user(uid, original)
     
     async def update_asset(self) -> None:
         await api.DataManager().update_data()
 
-    async def profile(self, uid: int) -> ZenkaGenerator:
+    async def profile(self, uid: int, color: Tuple[int,int,int,int] = None) -> ZenkaGenerator:
         result = ZenkaGenerator()
         data =  await api.fetch_user(uid)
         for key in data.character_info.characters:           
             result.charter_name.append(key.name)
             result.charter_id.append(key.id)
 
-        result.cards.append(await style_one_profile.StyleOneProfile(key, data.player, self.translateLang, color = self.config.color.get(key.id), hide = self.config.hide_uid).start())
+        result.cards.append(await style_one_profile.StyleOneProfile(key, data.player, self.translateLang, color = color, hide = self.config.hide_uid).start())
         result.player = data.player
         
         if self.config.save:

@@ -103,7 +103,10 @@ class StyleOne:
             self.art = await pill.get_user_image(self.art)
             user_image = await pill.get_center_size((563,802), self.art)
             if not self.color:
-                self.color = await pill.get_colors(user_image.convert("RGBA"), 15, common=True, radius=5, quality=800)
+                self.color = await pill.get_colors(user_image.convert("RGBA"), 5, common=True, radius=30, quality=800)
+                ll = await pill.light_level(self.color[:3])
+                if ll < 45:
+                    self.color = await pill.get_light_pixel_color(self.color[:3],up = True)
             image_background.alpha_composite(user_image)
             full_background.paste(image_background,(0,0), mask.convert("L"))
             self.background.alpha_composite(full_background)
@@ -440,11 +443,10 @@ class StyleOne:
         self.nickname.alpha_composite(uid, (4,38))
 
 
-
     async def build(self):
         self.background.alpha_composite(self.name, (559,16))
         self.background.alpha_composite(self.skill, (622,184))
-        self.background.alpha_composite(self.weapon, (653,395))
+        self.background.alpha_composite(self.weapon, (663,395))
         self.background.alpha_composite(self.cinema, (434,25))
         self.background.alpha_composite(self.stats, (1165,3))
         self.background.alpha_composite(self.nickname, (0,724))
