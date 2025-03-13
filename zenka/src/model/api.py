@@ -86,10 +86,11 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
     if "23203" not in base_props:
         base_props["23203"] = 0
 
+    if weapon:
+        base_props["12101"] += weapon.main.value
     main_base_props = base_props.copy()
 
     if weapon:
-        base_props["12101"] += weapon.main.value
         for stat in [weapon.sub]:
             stat_id = str(stat.id)
             if stat_id in base_props:
