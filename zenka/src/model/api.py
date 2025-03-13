@@ -392,6 +392,25 @@ class WeaponProps(BaseModel):
     id: int
     value: int
     icon: str = None
+    format: str = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+    def get_value(self) -> str:
+        if self.id in [12103, 13103]:
+            return str(int(self.value))
+        if self.format == "{0:0}":
+            return "{:.0f}".format(math.floor(self.value))
+        elif self.format == "{0:0.#}":
+            return "{:.1f}".format(math.floor(self.value * 10) / 10)
+        elif self.format == "{0:0.##}":
+            return "{:.2f}".format(math.floor(self.value * 100) / 100)
+        elif self.format == "{0:0.#%}":
+            return "{:.1f}%".format(math.floor((self.value/100) * 10) / 10)
+        else:
+            return self.value
 
 
 class ZenkaApi(BaseModel):
@@ -432,7 +451,7 @@ class ZenkaApi(BaseModel):
                 charters.weapon.main = WeaponProps(id = main_id, value = weapon_main(jsons_data, charters.weapon.level, charters.weapon.asc,charters.weapon.id), icon = ICON_PROPS.get(main_id, ""))
             
                 sub_id = int(weapon_datas.get("SecondaryStat").get("PropertyId"))
-                charters.weapon.sub = WeaponProps(id = weapon_datas.get("SecondaryStat").get("PropertyId"), value = weapon_sub(jsons_data, charters.weapon.asc,charters.weapon.id), icon = ICON_PROPS.get(sub_id, ""))
+                charters.weapon.sub = WeaponProps(id = sub_id, value = weapon_sub(jsons_data, charters.weapon.asc,charters.weapon.id), icon = ICON_PROPS.get(sub_id, ""), format=property_data.get(str(sub_id), {}).get("Format"))
 
             self.player.characters.append(
                 CharterShowCase(
