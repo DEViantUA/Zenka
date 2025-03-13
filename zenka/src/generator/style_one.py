@@ -244,8 +244,7 @@ class StyleOne:
         self.weapon.alpha_composite(icon_main, (181,82))
         self.weapon.alpha_composite(icon_sub, (286,82))
         d.text((218, 82), str(self.data.weapon.main.value), font=font, fill=(255,255,255,255))
-        percentage = self.data.weapon.sub.value / 100
-        formatted_percentage = f"{percentage:.1f}%"
+        formatted_percentage = self.data.weapon.sub.get_value()
         d.text((321, 82), str(formatted_percentage), font=font, fill=(255,255,255,255))
 
         rarity = await get_rarity(self.data.weapon.rarity)
