@@ -105,6 +105,7 @@ card_style = {
     'frame': 'background/frame.png',
     'mask': 'background/mask.png',
     'shadow': 'background/shadow.png',
+    'text_frame': 'background/text_frame.png',
 
 
     'frame_background_black': 'relict/frame_background_black.png',
@@ -112,6 +113,7 @@ card_style = {
     'frame_relict': 'relict/frame.png',
     'frame_wb_background': 'relict/frame_wb_background.png',
     'lvl': 'relict/lvl.png',
+    'rank_leve': "relict/rank_level.png",
     'sets_background': 'relict/sets_background.png',
     'sets_collor': 'relict/sets_collor.png',
     'sets_count': 'relict/sets_count.png',

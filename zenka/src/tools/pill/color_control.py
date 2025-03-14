@@ -6,6 +6,24 @@ from .. import cache
 
 _caches = cache.Cache.get_cache()
 
+def is_white_visible(background_color: tuple, threshold: float = 4.5) -> bool:
+    def relative_luminance(rgb):
+        def transform(c):
+            c /= 255
+            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+        
+        r, g, b = rgb
+        return 0.2126 * transform(r) + 0.7152 * transform(g) + 0.0722 * transform(b)
+
+    # Яркость белого цвета
+    luminance_white = relative_luminance((255, 255, 255))
+    # Яркость фона
+    luminance_bg = relative_luminance(background_color)
+    
+    # Рассчет коэффициента контраста
+    contrast_ratio = (luminance_white + 0.05) / (luminance_bg + 0.05)
+
+    return contrast_ratio >= threshold
 async def apply_opacity(image, opacity=0.2):
     result_image = image.copy()
     alpha = result_image.split()[3]

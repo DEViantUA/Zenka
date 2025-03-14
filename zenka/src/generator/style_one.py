@@ -1,4 +1,6 @@
+import asyncio
 from PIL import Image, ImageDraw
+from typing import Tuple
 from ..model.base import Translator
 from ..model.api import Character, Equipment, PlayerData
 from ..tools.git import ImageCache
@@ -39,6 +41,12 @@ async def get_rarity(index: int) -> Image.Image:
         4: await _of.rank_w_s,
     }.get(index, await _of.rank_w_b)
 
+async def get_rank_color(index: int) -> Tuple[int,int,int,int]:
+    return {
+        2: (7,158,254),
+        3: (181,7,254),
+        4: (254,181,7)
+    }.get(index, (254,181,7))
 
 async def get_core(index: int) -> Image.Image:
     return {
@@ -83,10 +91,9 @@ class StyleOne:
     async def create_background(self):
         full_background = Image.new("RGBA", (1927,802), (0,0,0,0))
         image_background = Image.new("RGBA",(1927,802), (0,0,0,0))
-
+        text_frame = await _of.text_frame
         background = await _of.background
         self.background = background.convert("RGBA").copy()
-
         mask = await _of.mask
         shadow = await _of.shadow
 
@@ -111,7 +118,9 @@ class StyleOne:
             full_background.paste(image_background,(0,0), mask.convert("L"))
             self.background.alpha_composite(full_background)
         else:
+            text_frame = await pill.recolor_image(text_frame, self.color[:3])
             self.background.alpha_composite(charter_bg)
+            self.background.alpha_composite(text_frame, (-2,8))
             icon = get_agent_icon(self.data.id)
             user_image = await pill.get_download_img(icon.image, size=(942,946))
             user_image_w = await pill.recolor_image(user_image, (255,255,255))
@@ -121,7 +130,6 @@ class StyleOne:
             image_background.alpha_composite(user_image, (-196, 0))
             full_background.paste(image_background,(0,0), mask.convert("L"))
             self.background.alpha_composite(full_background)
-            pass
         
         await self.create_litetal()
         self.background.alpha_composite(shadow, (379,-17))
@@ -309,9 +317,14 @@ class StyleOne:
 
         
         background_w_b = await _of.frame_wb_background
-        echo_background.alpha_composite(background_w_b,(0,2))
-        echo_background.alpha_composite(background.resize((187,201)), (0,10))
-    
+        echo_background.alpha_composite(background_w_b)
+        echo_background.alpha_composite(background.resize((187,201)), (3,11))
+
+        rarity = await get_rarity(data.rarity)
+        rank_leve = await _of.rank_leve
+        rank_leve = await pill.recolor_image(rank_leve, await get_rank_color(data.rarity))
+        echo_background.alpha_composite(rank_leve)
+        echo_background.alpha_composite(rarity.copy().convert("RGBA").resize((27,27)), (10,16))
         return echo_background
 
     async def create_litetal(self):
@@ -345,17 +358,13 @@ class StyleOne:
             (137,293),
         ]
         
-        last_true_index = next((i for i in reversed(range(len(self.data.cinema))) if self.data.cinema[i]), 0)
-
-        for i, key in enumerate(self.data.cinema):
+        for i in range(6):
             icon = await get_cinema(i)
-            if i <= last_true_index and last_true_index != 0:
+            if i < self.data.const and self.data.const != 0:
                 icon = await pill.recolor_image(icon, (0,0,0))
             else:
                 icon = await pill.recolor_image(await _of.conts_0_lvl, (0,0,0))
-                #icon = await pill.recolor_image(icon, (0,0,0))
-                #icon.alpha_composite(icon_closed)
-
+                
             self.cinema.alpha_composite(icon.resize((53,53)),position[i])
 
     async def create_stats(self):
@@ -416,7 +425,7 @@ class StyleOne:
             d = ImageDraw.Draw(bg)
             d.text((30, 15),f"{filtered_data[key]['count']}X", font=font, fill=(255,255,255,255))
             font = await pill.get_font(24)
-            white_color = (255,255,255,255)  if not await pill.is_white_text_readable(color) else (32,32,32,32)
+            white_color = (255,255,255,255) if pill.is_white_visible(color) else (32,32,32,32)
             d.text((82, 18),filtered_data[key]['name'], font=font, fill=white_color)
 
             self.sets.append(bg)
@@ -440,7 +449,6 @@ class StyleOne:
         self.nickname.alpha_composite(uid_c, (5,40))
         #self.nickname.alpha_composite(uid_b, (2,40))
         self.nickname.alpha_composite(uid, (4,38))
-
 
     async def build(self):
         self.background.alpha_composite(self.name, (559,16))
@@ -472,14 +480,19 @@ class StyleOne:
         self.background.alpha_composite(sets, (541,586))
 
     async def start(self) -> ZZZCard:
-        #await self.create_litetal()
         await self.create_background()
-        await self.create_name()
-        await self.create_skill()
-        await self.create_weapon()
-        await self.create_cinema()
-        await self.create_stats()
-        await self.create_nickname()
+        await self.create_litetal()
+        task = [
+            self.create_name(),
+            self.create_skill(),
+            self.create_weapon(),
+            self.create_cinema(),
+            self.create_stats(),
+            self.create_nickname(),
+        ]
+
+        await asyncio.gather(*task)
+
         self.disc = []
         self.sets = {}
         for key in self.data.equippe:
