@@ -245,7 +245,7 @@ class StyleOne:
 
 
         icon_main = await pill.get_download_img(self.data.weapon.main.icon, size=(30,30))
-        icon_sub = await pill.get_download_img(self.data.weapon.main.icon, size=(30,30))
+        icon_sub = await pill.get_download_img(self.data.weapon.sub.icon, size=(30,30))
         font = await pill.get_font(27)
         d = ImageDraw.Draw(self.weapon)
 
