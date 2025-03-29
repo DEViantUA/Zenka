@@ -71,12 +71,13 @@ async def get_cinema(index: int) -> Image.Image:
 
 
 class StyleOne:
-    def __init__(self, data: Character, player: PlayerData, lang: Translator, art: str = None, color: tuple = None, hide: bool = False):
+    def __init__(self, data: Character, player: PlayerData, lang: Translator, art: str = None, color: tuple = None, hide: bool = False, crop: int = 0):
         self.data = data
         self.player = player
         self.lang = lang
         self.art = art
         self.hide = hide
+        self.crop = crop
         
         if color:
             self.color = color
@@ -213,12 +214,12 @@ class StyleOne:
         self.weapon.alpha_composite(icon, (5,3))
         self.weapon.alpha_composite(stars.resize((117,42)), (90,124))
         
-        name_main = await pill.create_image_with_text(self.data.weapon.name, 33, stroke_width=2, stroke_fill= (0,0,0,255), max_width= 309)
-        name = await pill.create_image_with_text(self.data.weapon.name, 33, max_width= 309)
+        name_main = await pill.create_image_with_text(self.data.weapon.name, 31, stroke_width=2, stroke_fill= (0,0,0,255), max_width= 309)
+        name = await pill.create_image_with_text(self.data.weapon.name, 31, max_width= 309) 
         name = await pill.recolor_image(name, self.color[:3]) 
         xyz = 0
         if name_main.size[1] > 60:
-            xyz = 20
+            xyz = 30
         self.weapon.alpha_composite(name, (157,32-xyz))
         self.weapon.alpha_composite(name_main, (155,30-xyz))
         
@@ -251,9 +252,9 @@ class StyleOne:
 
         self.weapon.alpha_composite(icon_main, (181,82))
         self.weapon.alpha_composite(icon_sub, (286,82))
-        d.text((218, 82), str(self.data.weapon.main.value), font=font, fill=(255,255,255,255))
+        d.text((218, 80), str(self.data.weapon.main.value), font=font, fill=(255,255,255,255))
         formatted_percentage = self.data.weapon.sub.get_value()
-        d.text((321, 82), str(formatted_percentage), font=font, fill=(255,255,255,255))
+        d.text((321, 80), str(formatted_percentage), font=font, fill=(255,255,255,255))
 
         rarity = await get_rarity(self.data.weapon.rarity)
         self.weapon.alpha_composite(rarity.convert("RGBA").resize((35,35)), (22,18))
@@ -455,16 +456,16 @@ class StyleOne:
         self.background.alpha_composite(self.skill, (622,184))
         self.background.alpha_composite(self.weapon, (663,395))
         self.background.alpha_composite(self.cinema, (434,25))
-        self.background.alpha_composite(self.stats, (1165,3))
+        self.background.alpha_composite(self.stats, (1165 - self.crop,10))
         self.background.alpha_composite(self.nickname, (0,724))
-        x = 1194
-        y = 323
+        x = 1194 - self.crop
+        y = 333
         for _, key in enumerate(self.disc):
             self.background.alpha_composite(key, (x,y))
             x += 243
             if _ == 2:
-                x = 1194
-                y = 555
+                x = 1194 - self.crop
+                y = 565
 
         position = {
             1: [(102,71)], 
@@ -478,6 +479,10 @@ class StyleOne:
             pass
         
         self.background.alpha_composite(sets, (541,586))
+
+
+        if self.crop:
+            self.background = self.background.crop((0, 0, self.background.width - self.crop - 20, self.background.height))
 
     async def start(self) -> ZZZCard:
         await self.create_background()

@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from typing_extensions import Self
+from pydantic import BaseModel, Field, model_validator
 from typing import Dict, Tuple, Optional
 from enum import Enum
 
@@ -93,9 +94,18 @@ class Config(BaseModel):
     save: bool = False
     hide_uid: bool = False
     asset_save: bool = False
+    crop: int = 0
     cache: CacheConfig = CacheConfig()
     proxy: Optional[str] = None
+
     color: Dict[int, Tuple[int, int, int, int]] = Field(default_factory=dict)
+
+
+    @model_validator(mode='after')
+    def check_crop(self) -> Self:
+        if self.crop > 120:
+            raise ValueError('crop cannot be greater than 50')
+        return self
 
 class ErrorText(BaseModel):
     lang: Dict[int, str] = {"code": 1, "text": "This language key [{lang}] is not supported"}

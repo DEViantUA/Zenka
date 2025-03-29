@@ -84,7 +84,7 @@ class Client:
                 if not key.id in self.character_id:
                     continue 
         
-            task.append(style_one.StyleOne(key, data.player, self.translateLang, art = self.character_art.get(key.id), color = self.config.color.get(key.id), hide = self.config.hide_uid).start())
+            task.append(style_one.StyleOne(key, data.player, self.translateLang, art = self.character_art.get(key.id), color = self.config.color.get(key.id), hide = self.config.hide_uid, crop = self.config.crop).start())
         
         result.player = data.player
         result.cards = await asyncio.gather(*task)

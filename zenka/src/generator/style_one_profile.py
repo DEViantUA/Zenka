@@ -14,7 +14,7 @@ class StyleOneProfile:
     def __init__(self, data: Character, player: PlayerData, lang: Translator, color: tuple = None, hide: bool = False):
         self.data = data
         self.player = player
-        self.lang = lang        
+        self.lang = lang
         self.hide = hide
         if color:
             self.color = color
