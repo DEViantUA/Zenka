@@ -8,6 +8,7 @@ config = zenka.Config(
     hide_uid = Falde, #bool - Hide UID
     cache = CacheConfig(150, 300), #CacheConfig - Setting Cash
     proxy = None, #str - proxy IP
+    crop = 0, #int - Crop image on the right side
     color = {"1151": (255, 10, 55, 255)} #dict - set user color to character
 )
 
