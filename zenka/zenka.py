@@ -4,9 +4,9 @@ import os
 from PIL import Image
 from typing import Dict, List, Union, Optional, Tuple
 from .src.model.base import Config, Lang, ErrorText, TranslationLang
-from .src.model.generator import ZenkaGenerator
+from .src.model.generator import ZenkaGenerator, ZenkaGeneratorTeams, ZenkaGeneratorTeams
 from .src.tools import cache, error, http, git, options, api
-from .src.generator import style_one, style_one_profile
+from .src.generator import style_one, style_one_profile, style_two
 
 def save_file(id: int, card: Image.Image):
     data = datetime.datetime.now().strftime("%d_%m_%Y %H_%M")
@@ -96,6 +96,25 @@ class Client:
 
 
         return result
+    
+    async def teams(self, uid: int) -> ZenkaGeneratorTeams:
+        result = ZenkaGeneratorTeams()
+        data =  await api.fetch_user(uid)
+        task = []
 
+        for key in data.character_info.characters:
+            result.charter_name.append(key.name)
+            result.charter_id.append(key.id)        
+            task.append(style_two.StyleTwo(key, data.player, self.translateLang, art = self.character_art.get(key.id), color = self.config.color.get(key.id), hide = self.config.hide_uid, crop = self.config.crop).start())
+        
+        result.player = data.player
+        result.cards = await asyncio.gather(*task)
+
+
+        if self.config.save:
+            for key in result.cards:
+                save_file(key.id, key.card)
+                
+        return result
 
 

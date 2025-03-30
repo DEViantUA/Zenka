@@ -10,7 +10,6 @@ from ..model.base import URL_ASSETS
 from ..model.assets import get_agent_icon, get_color_agent
 
 _of = ImageCache()
-_of.set_mapping(1)
 
 
 async def get_skill_icon(index: int) -> Image.Image:
@@ -274,7 +273,7 @@ class StyleOne:
         background.alpha_composite(await _of.frame_relict)
 
         lvl_frame = await _of.lvl
-        lvl_frame.copy()
+        lvl_frame = lvl_frame.copy()
 
         font = await pill.get_font(25)
         d = ImageDraw.Draw(lvl_frame)

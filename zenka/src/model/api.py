@@ -245,8 +245,8 @@ class WeaponData(BaseModel):
     cons: int = Field(alias="UpgradeLevel")
     icon: str = None
     professio: str = None
-    main: dict = None
-    sub: dict = None
+    main: WeaponProps = None
+    sub: WeaponProps = None
     asc: int = Field(alias="BreakLevel")
 
 class SkillLevelList(BaseModel):
@@ -318,7 +318,7 @@ class Equipment(BaseModel):
     trash: bool = Field(alias="IsTrash")
     main: List[MainProperty] = Field(alias="MainPropertyList")
     sub: List[SubProperty] = Field(alias="RandomPropertyList")
-    sets: dict = None
+    sets: Sets = None
 
 class EquippedList(BaseModel):
     slot: int = Field(alias="Slot")
@@ -338,10 +338,10 @@ class CharterShowCase(BaseModel):
 class Character(BaseModel):
     id: int = Field(alias="Id")
     name: str = None
-    icon: str = None
-    element: str = None
+    icon: CharterIcon = None
+    element: Element = None
     faction: str = None
-    profession: str = None
+    profession: Profession = None
     rarity: int = None
     color: dict = None
     level: int = Field(alias="Level")
@@ -352,7 +352,7 @@ class Character(BaseModel):
     const: int = Field(alias="TalentLevel")
     weapon: Optional[WeaponData]  = Field(None, alias="Weapon")
     equippe: List[EquippedList] = Field(alias="EquippedList")
-    stats: list = None
+    stats: List[Stat] = None
     reward: Optional[List[int]] = Field(alias="ClaimedRewardList")
     
     model_config = ConfigDict(populate_by_name=True)
@@ -371,8 +371,8 @@ class CharterIcon(BaseModel):
     circle_icon: str
 
 class Element(BaseModel):
-    name: str
-    icon: str
+    name: str = ""
+    icon: str = ""
 
 class Profession(BaseModel):
     name: str

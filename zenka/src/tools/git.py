@@ -154,6 +154,37 @@ profile_style = {
     
 }
 
+
+card_style_team = {
+    'background':'style_teams/background.png',
+    'background_mask':'style_teams/background_mask.png',
+    'text_frame':'style_teams/text_frame.png',
+
+    'lvl_disk':'style_teams/lvl_disk.png',
+    'frame_disk_lvl':'style_teams/frame_disk_lvl.png',
+    'disk_bg':'style_teams/disk_bg.png',
+
+
+    'main_bg_disk_stat':'style_teams/main_bg_disk_stat.png',
+    'sub_bg_disk_stat':'style_teams/sub_bg_disk_stat.png',
+    'texture_disk_main':'style_teams/texture_disk_main.png',
+    'rank_leve': "relict/rank_level.png",
+
+    'full_bg':'style_teams/full_bg.png',
+    'full_bg_b':'style_teams/full_bg_dark.png',
+
+    'info_bg':'style_teams/info_bg.png',
+    'stats_bg':'style_teams/stats_bg.png',
+
+    'weapon_bg':'style_teams/weapon_bg.png',
+    'levl': 'weapon/levl.png',
+    'up': 'weapon/up.png',
+    
+    'skill_bg':'style_teams/skill_bg.png',
+    'skill_frame':'style_teams/skill_frame.png',
+    'skill_lvl':'style_teams/skill_lvl.png',
+}
+
 class ImageCache:
     
     _assets_download = False
@@ -169,10 +200,11 @@ class ImageCache:
             cls._mapping = card_style
         elif style == 2:
             cls._mapping = profile_style
-
+        elif style == 3:
+            cls._mapping = card_style_team
         
     @classmethod
-    async def _load_image(cls, name):
+    async def _load_image(cls, name) -> Image.Image:
         
         try:
             image = _caches[name]
@@ -204,7 +236,7 @@ class ImageCache:
         
         return image
 
-    async def __getattr__(cls, name):
+    async def __getattr__(cls, name) -> Image.Image:
         if name in cls._mapping:
             return await cls._load_image(cls._mapping[name])
         else:

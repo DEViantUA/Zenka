@@ -1,6 +1,7 @@
 # Copyright 2024 DEViantUa <t.me/deviant_ua>
 # All rights reserved.
 import colorsys
+from typing import Union
 from PIL import Image
 from .. import cache 
 
@@ -24,6 +25,7 @@ def is_white_visible(background_color: tuple, threshold: float = 4.5) -> bool:
     contrast_ratio = (luminance_white + 0.05) / (luminance_bg + 0.05)
 
     return contrast_ratio >= threshold
+
 async def apply_opacity(image, opacity=0.2):
     result_image = image.copy()
     alpha = result_image.split()[3]
@@ -112,7 +114,6 @@ async def _get_dark_pixel_color(pixel_color):
     a = tuple(round(x * 255) for x in colorsys.hls_to_rgb(h, l, s))
     
     return  a
-
 
 
 
