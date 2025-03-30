@@ -97,6 +97,15 @@ asyncio.run(main(uid))
 
 </details>
 
+<details>
+<summary>Card Teams</summary>
+ 
+[![Teams][4]][4]
+ 
+[4]: https://raw.githubusercontent.com/DEViantUA/Zenka/refs/heads/main/readme/style_two.png
+
+</details>
+
 
 
 ## Thank you for your support! ❤️
