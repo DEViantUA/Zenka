@@ -486,6 +486,9 @@ class ZenkaApi(BaseModel):
                     subs.format = property_data.get(str(subs.id), {}).get("Format", "{}")
 
         for medal in self.player.medal_list:
+            if medal.id == 0:
+                continue
+            
             medal.name = data_lang.get(medal_data.get(str(medal.id)).get("Name"))
             medal.icon = medal_data.get(str(medal.id)).get("Icon")
         
