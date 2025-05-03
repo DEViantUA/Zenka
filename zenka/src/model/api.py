@@ -348,12 +348,12 @@ class Character(BaseModel):
     max_level: int = Field(alias="PromotionLevel")
     skills: List[SkillLevelList] = Field(alias="SkillLevelList")
     core_skill: int = Field(alias="CoreSkillEnhancement")
-    cinema: List[bool] = Field(alias="TalentToggleList")
+    cinema: Optional[List[bool]] = Field(default=None, alias="TalentToggles")
     const: int = Field(alias="TalentLevel")
     weapon: Optional[WeaponData]  = Field(None, alias="Weapon")
     equippe: List[EquippedList] = Field(alias="EquippedList")
     stats: List[Stat] = None
-    reward: Optional[List[int]] = Field(alias="ClaimedRewardList")
+    reward: Optional[List[int]] = Field(default=None, alias="ClaimedRewardList")
     
     model_config = ConfigDict(populate_by_name=True)
 
