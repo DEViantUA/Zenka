@@ -11,6 +11,13 @@ from ..model.assets import get_agent_icon, get_color_agent
 
 _of = ImageCache()
 
+def hex_to_rgba(hex_color, alpha=255):
+    return hex_color[0], hex_color[1], hex_color[2], alpha
+
+def hex_to_rgb(hex_color):
+    return hex_color[0], hex_color[1], hex_color[2]
+
+
 async def get_skill_icon(index: int) -> Image.Image:
     return {
         0: await _of.skill_1_s,
@@ -76,16 +83,16 @@ class StyleTwo:
         self.art = art
         self.hide = hide
         self.crop = crop
-        
+        colors = get_color_agent(data.id)
+        self.accent = colors.accent
         if color:
             self.color = color
         elif art:
             self.color = None
         else:
-            colors = get_color_agent(data.id)
             self.color = colors.mindscape
 
-        _of.set_mapping(3)
+    _of.set_mapping(3)
 
 
     async def create_background(self):
@@ -145,7 +152,7 @@ class StyleTwo:
         skill_frame = await _of.skill_frame
         skill_frame = await pill.recolor_image(skill_frame, self.color[:3])
         font = await pill.get_font(18)
-        last_true_index = next((i for i in reversed(range(len(self.data.cinema))) if self.data.cinema[i]), 0)
+        last_true_index = self.data.const
 
         position_skill = [
             (8,0),
@@ -286,10 +293,14 @@ class StyleTwo:
         
         for i, key in enumerate(self.data.stats):
             icon = await pill.get_download_img(key.icon, (25,25))
+            if key.highlight:
+                color_img = Image.new("RGBA", icon.size, hex_to_rgba(self.accent, 0))
+                color_img.paste(hex_to_rgb(self.accent), mask=icon.split()[3])
+                icon = color_img
             self.stats.alpha_composite(icon, (position_icon_x,position_icon_y))
             text_val = key.get_value()
             x = int(font.getlength(text_val))
-            d.text((position_text_x - x, position_text_y), text_val, font=font, fill= (255,255,255,255))
+            d.text((position_text_x - x, position_text_y), text_val, font=font, fill= (255,255,255,255) if not key.highlight else self.accent)
 
             position_icon_y += 36
             position_text_y += 36

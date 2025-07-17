@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field, ConfigDict, field_validator
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Any
 import math
 
 ICON_PROPS = {
@@ -12,6 +12,7 @@ ICON_PROPS = {
     12103: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-4.png",  # ATK [Flat]
     12201: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-6.png",  # Impact [Base]
     12202: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-6.png",  # Impact%
+    12301: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/sheerforce.png",  # Sheer Force
     13101: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-5.png",  # Def [Base]
     13102: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-5.png",  # Def%
     13103: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-5.png",  # Def [Flat]
@@ -40,7 +41,9 @@ ICON_PROPS = {
     31801: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-2%20(3).png",  # Electric DMG Bonus [Base]
     31803: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-2%20(3).png",  # Electric DMG Bonus [Flat]
     31901: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-2%20(4).png",  # Ether DMG Bonus [Base]
-    31903: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-2%20(4).png"   # Ether DMG Bonus [Flat]
+    31903: "https://raw.githubusercontent.com/DEViantUA/ZZZeroCardData/refs/heads/main/icon/svgexport-2%20(4).png",   # Ether DMG Bonus [Flat],
+    32002: "https://raw.githubusercontent.com/CUSTOMFAIL/ZZZeroCardData/refs/heads/main/icon/aaa.png"                # Automatic Adreneline Accumulation
+
 }
 
 
@@ -57,7 +60,7 @@ def weapon_sub(jsons_data:dict, asc:int, v:int):
     formula = main_value * (1 + wp_star_value / 10000)
     return int(formula)
 
-def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid: int, weapon: WeaponData, equipped: List[EquippedList], lang_dict: dict):
+def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid: int, weapon: WeaponData, equipped: List[EquippedList], prof:str, lang_dict: dict):
    
     promotion = int(promotion)
     avatar_data = jsons_data["avatars_data"].get(str(cid), {})
@@ -68,6 +71,7 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
     growth_props = avatar_data.get("GrowthProps", {})
     promotion_props = avatar_data.get("PromotionProps", [])
     core_enhancement_props = avatar_data.get("CoreEnhancementProps", {})
+    high_light_props = avatar_data.get("HighlightProps", {})
 
     if promotion - 1 >= len(promotion_props):
         raise ValueError(f"Incorrect promotion {promotion} for CID {cid}")
@@ -85,11 +89,15 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
         base_props["23103"] = 0
     if "23203" not in base_props:
         base_props["23203"] = 0
+    if "32001" in base_props:
+        base_props['32002'] = base_props.pop('32001')
+
+    if weapon:
+        base_props["12101"] += weapon.main.value
 
     main_base_props = base_props.copy()
 
     if weapon:
-        base_props["12101"] += weapon.main.value
         for stat in [weapon.sub]:
             stat_id = str(stat.id)
             if stat_id in base_props:
@@ -148,6 +156,17 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
         else:
             base_props[sid] = val
 
+    if prof == "Rupture":
+        base_props['12301'] = 0.1 * (base_props['11101']) + 0.3 * (base_props['12101'])
+    to_remove = []
+
+    for item, value in base_props.items():
+        if len(base_props) > 12:
+            if value == 0:
+                to_remove.append(item)
+    for key in to_remove:
+        base_props.pop(key)
+
     property_data = jsons_data.get("property_data", {})
     BaseStats = [
         Stat(
@@ -158,7 +177,8 @@ def calculate_stats(jsons_data: dict, level: int, promotion: int, core: int, cid
             format=property_data.get(key, {}).get("Format", "{}"),
             base = main_base_props.get(key, 0),
             add = int(value) - main_base_props.get(key, 0),
-            icon = ICON_PROPS.get(int(key), "")
+            icon = ICON_PROPS.get(int(key), ""),
+            highlight = True if int(key) in high_light_props else False
         )
         for key, value in base_props.items()
     ]
@@ -184,6 +204,7 @@ class Stat(BaseModel):
     format: str
     base: int = None
     add: int = None
+    highlight: bool = None
 
     
     def get_value(self, base: bool = False, add: bool = False) -> str:
@@ -196,8 +217,8 @@ class Stat(BaseModel):
 
         if self.id in [12101, 13101, 12201, 31401, 31201, 23203]:
             return str(int(val))
-        elif self.id == 30501:
-            return "{:.1f}".format(math.floor((val/100) * 10) / 10)
+        elif self.id in [30501, 32002]:
+            return "{:.1f}".format(math.floor((val / 100) * 10) / 10)
         if self.format == "{0:0}":
             return "{:.0f}".format(math.floor(val))
         elif self.format == "{0:0.#}":
@@ -205,14 +226,16 @@ class Stat(BaseModel):
         elif self.format == "{0:0.##}":
             return "{:.2f}".format(math.floor(val * 100) / 100)
         elif self.format == "{0:0.#%}":
-            return "{:.1f}%".format(math.floor((val/100) * 10) / 10)
+            return "{:.1f}%".format(math.floor((val / 100) * 10) / 10)
         else:
             return val
 
 class Title(BaseModel):
-    id: int = None
+    id: int = Field(alias="Title")
     name: str = None
     color: Color = None
+    val: List[Any] = Field(default_factory=list, alias="Args")
+    full_title: int = Field(default=0, alias="FullTitle")
 
 class Medal(BaseModel):
     id: int = Field(alias="MedalIcon")
@@ -227,13 +250,15 @@ class ProfileDetail(BaseModel):
     icon: str = None
     uid: int = Field(alias="Uid")
     level: int = Field(alias="Level")
-    title: Union[Title, int] = Field(alias="Title")
+    title: Union[Title, int] = Field(alias="TitleInfo")
     pfp_id: int = Field(alias="ProfileId")
+    banner_id: int = Field(alias="CallingCardId")
+    banner_icon: str = None
 
-    @field_validator("title")
+    @field_validator("title", mode="before")
     def validate_title(cls, value):
         if isinstance(value, int):
-            return Title(id=value)
+            return {"Title": value}
         return value
 
 class WeaponData(BaseModel):
@@ -245,8 +270,8 @@ class WeaponData(BaseModel):
     cons: int = Field(alias="UpgradeLevel")
     icon: str = None
     professio: str = None
-    main: WeaponProps = None
-    sub: WeaponProps = None
+    main: dict = None
+    sub: dict = None
     asc: int = Field(alias="BreakLevel")
 
 class SkillLevelList(BaseModel):
@@ -280,12 +305,12 @@ class SubProperty(BaseModel):
         else:
             return self.value
 
+
 class MainProperty(BaseModel):
     id: int = Field(alias="PropertyId")
     icon: str = None
     value: int = Field(alias="PropertyValue")
     format: str = None
-    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -301,9 +326,9 @@ class MainProperty(BaseModel):
         elif self.format == "{0:0.##}":
             return "{:.2f}".format(math.floor(self.value * 100) / 100)
         elif self.format == "{0:0.#%}":
-            return "{:.1f}%".format(math.floor((self.value/100) * 10) / 10)
+            return "{:.1f}%".format(math.floor((self.value / 100) * 10) / 10)
         else:
-            return self.value 
+            return self.value
 
 class Equipment(BaseModel):
     id: int = Field(alias="Id")
@@ -333,6 +358,7 @@ class CharterShowCase(BaseModel):
     color: Color
     level: int
     max_level: int
+    type_icon: str
 
 
 class Character(BaseModel):
@@ -429,7 +455,7 @@ class ZenkaApi(BaseModel):
         medal_data = jsons_data.get("medals_data", {})
         titles_data = jsons_data.get("titles_data", {})
         pfps_data = jsons_data.get("pfps_data", {})
-
+        namecard_data = jsons_data.get("namecards_data", {})
         for charters in self.character_info.characters:
             data_charters = data_charter.get(str(charters.id))
             hoyolink_datas = hoyolink_data.get(str(charters.id))
@@ -462,7 +488,8 @@ class ZenkaApi(BaseModel):
                     element = charters.element,
                     color = charters.color,
                     level = charters.level,
-                    max_level = charters.max_level
+                    max_level = charters.max_level,
+                    type_icon=data_charter[str(charters.id)]['ProfessionType']
                 )
             )
             for key in charters.equippe:
@@ -478,7 +505,7 @@ class ZenkaApi(BaseModel):
                 )
 
 
-            charters.stats = calculate_stats(jsons_data, charters.level, charters.max_level / 10, charters.core_skill, charters.id, charters.weapon, charters.equippe, data_lang)
+            charters.stats = calculate_stats(jsons_data, charters.level, charters.max_level / 10, charters.core_skill, charters.id, charters.weapon, charters.equippe, data_charter[str(charters.id)]['ProfessionType'], data_lang)
 
             for key in charters.equippe:
                 key.equipment.main[0].format = property_data.get(str(key.equipment.main[0].id), {}).get("Format", "{}")
@@ -493,9 +520,25 @@ class ZenkaApi(BaseModel):
             medal.icon = medal_data.get(str(medal.id)).get("Icon")
         
         title = titles_data.get(str(self.player.profile.title.id))
-        self.player.profile.icon = pfps_data.get(str(self.player.profile.pfp_id)).get("Icon")
+        cocaine = title
+        try:
+            self.player.profile.icon = pfps_data.get(str(self.player.profile.pfp_id)).get("Icon", "")
+        except:
+            self.player.profile.icon = 3200000
+        self.player.profile.banner_icon = namecard_data.get(str(self.player.profile.banner_id)).get("Icon", "")
+
         if title:
-            self.player.profile.title.name =  data_lang.get(title.get("TitleText"))
-            self.player.profile.title.color = Color(accent= title.get("ColorA"), mindscape= title.get("ColorB"))
+            self.player.profile.title.color = Color(accent=title.get("ColorA"), mindscape=title.get("ColorB"))
+            if self.player.profile.title.full_title and self.player.profile.title.full_title != 0 and self.player.profile.title.val:
+                title = titles_data.get(str(self.player.profile.title.full_title))
+            if cocaine['Variants']:
+                self.player.profile.title.name = data_lang.get(list(cocaine['Variants'].values())[-1])
+            else:
+                self.player.profile.title.name = data_lang.get(cocaine.get("TitleText"))
+            if self.player.profile.title.full_title and self.player.profile.title.full_title != 0 and self.player.profile.title.val:
+                self.player.profile.title.name = self.player.profile.title.name.replace("{0}",self.player.profile.title.val[0])
         else:
             self.player.profile.title = None
+
+        ProfileDetail.model_rebuild()
+        Title.model_rebuild()

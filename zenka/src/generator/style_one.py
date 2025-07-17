@@ -166,7 +166,7 @@ class StyleOne:
         self.skill = Image.new("RGBA", (363,165), (0,0,0,0))
         skill_coont = await _of.skill_count
         font = await pill.get_font(25)
-        last_true_index = next((i for i in reversed(range(len(self.data.cinema))) if self.data.cinema[i]), 0)
+        last_true_index = self.data.const
 
         position_skill = [
             (0,0),
